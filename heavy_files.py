@@ -13,10 +13,13 @@ import urllib.parse
 from time import sleep
 import argparse
 from functools import lru_cache
+
 user32 = ctypes.windll.user32
-clsid = '{9BA05972-F6A8-11CF-A442-00A0C90A8F39}' #Valid for InternetExplorer as well!
-shellwindows = win32.Dispatch(clsid)
+shellwindows = win32.Dispatch('{9BA05972-F6A8-11CF-A442-00A0C90A8F39}') #Valid for InternetExplorer as well!
 fso = win32.Dispatch('Scripting.FileSystemObject')
+shell = win32.Dispatch("WScript.Shell")
+
+
 ####################################################################################################
 
 # naturalsize function from humanize, https://pypi.org/project/humanize/
@@ -161,11 +164,13 @@ def selected_files():
                 if window_dir==address_1:
                     selected_files = shellwindows[window].Document.SelectedItems()
                     for file in range(selected_files.Count):
-                        files.append(selected_files.Item(file).Path)
+                        files.append(os.path.realpath(selected_files.Item(file).Path))
                     # print("Files --> "+str(files))
-                    return tuple(files)
+                    result.extend(files)
+
     except Exception as exc:
         pass
+    return tuple(result)
 
 ####################################################################################################
 
@@ -222,14 +227,16 @@ MAX_SPEED = args.max_speed
 REFRESH_RATE = args.refresh_rate
 
 ####################################################################################################
-from timer import Timer
-cache = {}
+
 @lru_cache
 def getsize(path):
     if os.path.isfile(path):
+        if os.path.splitext(path)[1] == '.lnk':
+            return getsize(shell.CreateShortCut(path).Targetpath)
         return fso.GetFile(path).Size
     elif os.path.isdir(path):
         return fso.GetFolder(path).Size
+
 
 try:
     while True:
@@ -244,7 +251,5 @@ try:
         if win32api.GetKeyState(0x01) >= 0:
             change_speed(default_speed)
         sleep(REFRESH_RATE)
-except Exception as exc:
-    print(sys.exc_info())
 finally:
     change_speed(default_speed)
