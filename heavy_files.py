@@ -199,7 +199,8 @@ MIN_SPEED = 1
 MAX_SPEED = default_speed
 REFRESH_RATE = 1
 
-parser = argparse.ArgumentParser(description='Slows down the mouse pointer based on the size of the selected files.')
+parser = argparse.ArgumentParser(description='Slows down the mouse based on the size of the selected files.',
+                                 formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=32))
 
 parser.add_argument('--max_size', required=False, type=float, default=MAX_SIZE,
                     help=f"""Size in MB. The maximum size, when the speed is the minimum. (default: {naturalsize(MAX_SIZE)})""")
