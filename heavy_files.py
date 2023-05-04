@@ -195,38 +195,6 @@ def get_current_speed():
 
     return speed.value
 
-####################################################################################################
-
-default_speed = get_current_speed()
-
-MAX_SIZE = 500
-MIN_SPEED = 1
-MAX_SPEED = default_speed
-REFRESH_RATE = 1
-
-parser = argparse.ArgumentParser(description='Slows down the mouse based on the size of the selected files.',
-                                 formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=32))
-
-parser.add_argument('--max_size', required=False, type=float, default=MAX_SIZE,
-                    help=f"""Size in MB. The maximum size, when the speed is the minimum. (default: {naturalsize(MAX_SIZE)})""")
-
-parser.add_argument('--min_speed', required=False, type=int, default=MIN_SPEED,
-                    help=f"""Speed between 1 and 20. The minimum speed. (default: {MIN_SPEED})""")
-
-parser.add_argument('--max_speed', required=False, type=int, default=MAX_SPEED,
-                    help=f"""Speed between 1 and 20. The maximum speed. {f'(default: {MAX_SPEED}{" (current speed)" if MAX_SPEED==default_speed else ""})'}""")
-
-parser.add_argument('--refresh_rate', required=False, type=float, default=REFRESH_RATE,
-                    help=f"""(default: {REFRESH_RATE} s)""")
-
-args = parser.parse_args()
-
-MAX_SIZE = int(args.max_size*1000000)
-MIN_SPEED = args.min_speed
-MAX_SPEED = args.max_speed
-REFRESH_RATE = args.refresh_rate
-
-####################################################################################################
 
 @lru_cache
 def getsize(path):
@@ -236,20 +204,53 @@ def getsize(path):
         return fso.GetFile(path).Size
     elif os.path.isdir(path):
         return fso.GetFolder(path).Size
+    
+    
+    
+    
+if __name__ == '__main__':
+    default_speed = get_current_speed()
+
+    MAX_SIZE = 500
+    MIN_SPEED = 1
+    MAX_SPEED = default_speed
+    REFRESH_RATE = 1
+
+    parser = argparse.ArgumentParser(description='Slows down the mouse based on the size of the selected files.',
+                                     formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=32))
+
+    parser.add_argument('--max_size', required=False, type=float, default=MAX_SIZE,
+                        help=f"""Size in MB. The maximum size, when the speed is the minimum. (default: {naturalsize(MAX_SIZE)})""")
+
+    parser.add_argument('--min_speed', required=False, type=int, default=MIN_SPEED,
+                        help=f"""Speed between 1 and 20. The minimum speed. (default: {MIN_SPEED})""")
+
+    parser.add_argument('--max_speed', required=False, type=int, default=MAX_SPEED,
+                        help=f"""Speed between 1 and 20. The maximum speed. {f'(default: {MAX_SPEED}{" (current speed)" if MAX_SPEED==default_speed else ""})'}""")
+
+    parser.add_argument('--refresh_rate', required=False, type=float, default=REFRESH_RATE,
+                        help=f"""(default: {REFRESH_RATE} s)""")
+
+    args = parser.parse_args()
+
+    MAX_SIZE = int(args.max_size*1000000)
+    MIN_SPEED = args.min_speed
+    MAX_SPEED = args.max_speed
+    REFRESH_RATE = args.refresh_rate
 
 
-try:
-    while True:
-        files = selected_files()
-        if files and win32api.GetKeyState(0x01) < 0:
-            size=sum(map(getsize, files))
-            speed=MAX_SPEED-size*MAX_SPEED//MAX_SIZE
-            if speed<MIN_SPEED:
-                speed=MIN_SPEED
-            print(naturalsize(size), speed)
-            change_speed(speed)
-        if win32api.GetKeyState(0x01) >= 0:
-            change_speed(default_speed)
-        sleep(REFRESH_RATE)
-finally:
-    change_speed(default_speed)
+    try:
+        while True:
+            files = selected_files()
+            if files and win32api.GetKeyState(0x01) < 0:
+                size=sum(map(getsize, files))
+                speed=MAX_SPEED-size*MAX_SPEED//MAX_SIZE
+                if speed<MIN_SPEED:
+                    speed=MIN_SPEED
+                print(naturalsize(size), speed)
+                change_speed(speed)
+            if win32api.GetKeyState(0x01) >= 0:
+                change_speed(default_speed)
+            sleep(REFRESH_RATE)
+    finally:
+        change_speed(default_speed)
