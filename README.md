@@ -1,6 +1,8 @@
-# heavy_files
+# Heavy Files
 
 I made this program as answer to a [question on reddit](https://www.reddit.com/r/software/comments/nst42o/is_there_an_app_that_can_make_my_files_harder_to/).
+
+> Is there an app that can make my files harder to move around my desktop the heavier they are and easier to move the files if they are light? i need subtle payback from my friend and this is the best way to do it
 
 It works with selected folders, links, and multiple files, but unfortunately, I haven't been able to get it to work with files on the desktop.
 
